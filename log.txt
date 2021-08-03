@@ -1,0 +1,413 @@
+commit 01703c2197946118060932446927b7f854089aa7
+Author: Adam Elshimi <adam.elshimi@viavisolutions.com>
+Date:   Tue Aug 3 12:57:34 2021 +0100
+
+    first commit
+
+diff --git a/cheatsheet.pdf b/cheatsheet.pdf
+new file mode 100644
+index 0000000..190da1b
+--- /dev/null
++++ b/cheatsheet.pdf
+@@ -0,0 +1,400 @@
++                                                REINFORCEMENT LEARNING
++
++                                                              1. The Problem
++
++St             state at time t
++At
++Rt             action at time t
++γ
++Gt             reward at time t
++S
++S+             discount rate (where 0 ≤ γ ≤ 1)
++A
++A(s)           discounted return at time t (  ∞    γ    k  Rt+k+1  )
++R                                             k=0
++p(s , r|s, a)
++               set of all nonterminal states
++
++               set of all states (including terminal states)
++
++               set of all actions
++
++               set of all actions available in state s
++
++               set of all rewards
++
++               probability of next state s and reward r, given current state s and current action a (P(St+1 = s , Rt+1 = r|St = s, At = a))
++
++                                                              2. The Solution
++
++π              policy
++
++               if deterministic: π(s) ∈ A(s) for all s ∈ S
++
++vπ             saootcppattttiiiioemmf n-svaa-tavllolacsaulhtcueaatetifsoeutfn-iunvc-nca:vtclaiπutoliue(noaenf|fusfofun)ronc=rptcipotoPilonoi(lcnAiy(cvty(π∗q=(π∗s((va)s(πq,|=S.πa(st()m)s==,.=a.axsm)E)π=a[.fvGxoπEπrt(|[sqaSG)πltl(tf|s=soS,r∈tasa)=]Sllffoossarr,n∈AaadlltSlla=)ss∈∈∈a]ASSf(o)sar)nadll  s  ∈  S and  a  ∈  A(s))
++qπ                                                                                                                                                                                                                                                                                                         a  ∈  A(s))
++v∗
++q∗
++
++                                                                      1
++                                                 3. Bellman Equations
++
++3.1. Bellman Expectation Equations.
++
++                                     vπ(s) =             π(a|s)            p(s , r|s, a)(r + γvπ(s ))
++
++                                                 a∈A(s)          s ∈S,r∈R
++
++                                     qπ(s, a) =            p(s , r|s, a)(r + γ            π(a |s )qπ(s , a ))
++
++                                                 s ∈S,r∈R                       a ∈A(s )
++
++3.2. Bellman Optimality Equations.
++
++                                     v∗(s) = max                     p(s , r|s, a)(r + γv∗(s ))
++                                                 a∈A(s)
++                                                           s ∈S,r∈R
++
++                                     q∗(s, a) =            p(s , r|s, a)(r + γ max q∗(s , a ))
++                                                                                a ∈A(s )
++                                                 s ∈S,r∈R
++
++3.3. Useful Formulas for Deriving the Bellman Equations.
++
++                                                 vπ(s) =                   π(a|s)qπ(s, a)
++
++                                                                 a∈A(s)
++
++                                                           v∗(s) = max q∗(s, a)
++
++                                                                          a∈A(s)
++
++                                     qπ(s, a) =                      p(s , r|s, a)(r + γvπ(s ))
++
++                                                           s ∈S,r∈R
++
++                                     q∗(s, a) =                      p(s , r|s, a)(r + γv∗(s ))
++
++                                                           s ∈S,r∈R
++
++                                                                        2
++qπ(s, a) =. Eπ[Gt|St = s, At = a]                                                             (1)
++
++=            P(St+1 = s , Rt+1 = r|St = s, At = a)Eπ[Gt|St = s, At = a, St+1 = s , Rt+1 = r]  (2)
++
++   s ∈S,r∈R
++
++=            p(s , r|s, a)Eπ[Gt|St = s, At = a, St+1 = s , Rt+1 = r]                          (3)
++
++   s ∈S,r∈R
++
++=            p(s , r|s, a)Eπ[Gt|St+1 = s , Rt+1 = r]                                          (4)
++
++   s ∈S,r∈R
++
++=            p(s , r|s, a)Eπ[Rt+1 + γGt+1|St+1 = s , Rt+1 = r]                                (5)
++
++   s ∈S,r∈R
++
++=            p(s , r|s, a)(r + γEπ[Gt+1|St+1 = s ])                                           (6)
++
++   s ∈S,r∈R
++
++=            p(s , r|s, a)(r + γvπ(s ))                                                       (7)
++
++   s ∈S,r∈R
++
++The reasoning for the above is as follows:
++   • (1) by deﬁnition (qπ(s, a) =. Eπ[Gt|St = s, At = a])
++   • (2) Law of Total Expectation
++   • (3) by deﬁnition (p(s , r|s, a) =. P(St+1 = s , Rt+1 = r|St = s, At = a))
++   • (4) Eπ[Gt|St = s, At = a, St+1 = s , Rt+1 = r] = Eπ[Gt|St+1 = s , Rt+1 = r]
++   • (5) Gt = Rt+1 + γGt+1
++   • (6) Linearity of Expectation
++   • (7) vπ(s ) = Eπ[Gt+1|St+1 = s ]
++
++                                                      3
++                                                                             4. Dynamic Programming
++
++Algorithm 1: Policy Evaluation
++ Input: MDP, policy π, small positive number θ
++ Output: V ≈ vπ
++ Initialize V arbitrarily (e.g., V (s) = 0 for all s ∈ S+)
++ repeat
++      ∆←0
++      for s ∈ S do
++           v ← V (s)
++           V (s) ← a∈A(s) π(a|s) s ∈S,r∈R p(s , r|s, a)(r + γV (s ))
++           ∆ ← max(∆, |v − V (s)|)
++      end
++ until ∆ < θ;
++ return V
++
++Algorithm 2: Estimation of Action Values
++ Input: MDP, state-value function V
++ Output: action-value function Q
++ for s ∈ S do
++      for a ∈ A(s) do
++           Q(s, a) ← s ∈S,r∈R p(s , r|s, a)(r + γV (s ))
++      end
++ end
++ return Q
++
++                                                                                               4
++Algorithm 3: Policy Improvement
++
++ Input: MDP, value function V
++ Output: policy π
++ for s ∈ S do
++
++      for a ∈ A(s) do
++           Q(s, a) ← s ∈S,r∈R p(s , r|s, a)(r + γV (s ))
++
++      end
++      π (s) ← arg maxa∈A(s) Q(s, a)
++ end
++ return π
++
++Algorithm 4: Policy Iteration
++
++Input: MDP, small positive number θ
++
++Output: policy π ≈ π∗
++
++Initialize  π  arbitrarily  (e.g.,  π(a|s)  =     1    for  all  s  ∈  S  and  a  ∈  A(s))
++                                               |A(s)|
++
++policy-stable ← f alse
++
++repeat
++    V ← Policy Evaluation(MDP, π, θ)
++
++π ← Policy Improvement(MDP, V )
++
++if π = π then
++    policy-stable ← true
++
++end
++
++    π←π
++until policy-stable = true;
++
++return π
++
++Algorithm 5: Truncated Policy Evaluation
++
++Input: MDP, policy π, value function V , positive integer max iterations
++
++Output: V ≈ vπ (if max iterations is large enough)
++counter ← 0
++
++while counter < max iterations do
++
++for s ∈ S do                        s ∈S,r∈R p(s , r|s, a)(r + γV (s ))
++    V (s) ← a∈A(s) π(a|s)
++
++end
++
++    counter ← counter + 1
++end
++
++return V
++
++                                                                                            5
++Algorithm 6: Truncated Policy Iteration
++
++Input: MDP, positive integer max iterations, small positive number θ
++
++Output: policy π ≈ π∗
++Initialize V arbitrarily (e.g., V (s) = 0 for all s ∈ S+)
++
++Initialize  π  arbitrarily  (e.g.,  π(a|s)  =     1    for  all  s  ∈  S  and  a  ∈  A(s))
++                                               |A(s)|
++
++repeat
++
++π ← Policy Improvement(MDP, V )
++
++Vold ← V
++V ← Truncated Policy Evaluation(MDP, π, V, max iterations)
++
++until maxs∈S |V (s) − Vold(s)| < θ;
++return π
++
++Algorithm 7: Value Iteration
++
++ Input: MDP, small positive number θ
++ Output: policy π ≈ π∗
++ Initialize V arbitrarily (e.g., V (s) = 0 for all s ∈ S+)
++ repeat
++
++      ∆←0
++      for s ∈ S do
++
++           v ← V (s)
++           V (s) ← maxa∈A(s) s ∈S,r∈R p(s , r|s, a)(r + γV (s ))
++           ∆ ← max(∆, |v − V (s)|)
++      end
++
++ until ∆ < θ;
++ π ← Policy Improvement(MDP, V )
++ return π
++
++                                                                                            6
++                                                                            5. Monte Carlo Methods
++
++Algorithm 8: First-Visit MC Prediction (for state values)
++ Input: policy π, positive integer num episodes
++ Output: value function V (≈ vπ if num episodes is large enough)
++ Initialize N (s) = 0 for all s ∈ S
++ Initialize returns sum(s) = 0 for all s ∈ S
++ for i ← 1 to num episodes do
++      Generate an episode S0, A0, R1, . . . , ST using π
++      for t ← 0 to T − 1 do
++           if St is a ﬁrst visit (with return Gt) then
++               N (St) ← N (St) + 1
++               returns sum(St) ← returns sum(St) + Gt
++      end
++ end
++ V (s) ← returns sum(s)/N (s) for all s ∈ S
++ return V
++
++Algorithm 9: First-Visit MC Prediction (for action values)
++ Input: policy π, positive integer num episodes
++ Output: value function Q (≈ qπ if num episodes is large enough)
++ Initialize N (s, a) = 0 for all s ∈ S, a ∈ A(s)
++ Initialize returns sum(s, a) = 0 for all s ∈ S, a ∈ A(s)
++ for i ← 1 to num episodes do
++      Generate an episode S0, A0, R1, . . . , ST using π
++      for t ← 0 to T − 1 do
++           if (St, At) is a ﬁrst visit (with return Gt) then
++               N (St, At) ← N (St, At) + 1
++               returns sum(St, At) ← returns sum(St, At) + Gt
++      end
++ end
++ Q(s, a) ← returns sum(s, a)/N (s, a) for all s ∈ S, a ∈ A(s)
++ return Q
++
++                                                                                               7
++Algorithm 10: First-Visit GLIE MC Control
++
++Input: positive integer num episodes, GLIE { i}
++Output: policy π (≈ π∗ if num episodes is large enough)
++Initialize Q(s, a) = 0 for all s ∈ S and a ∈ A(s)
++
++Initialize N (s, a) = 0 for all s ∈ S, a ∈ A(s)
++
++for i ← 1 to num episodes do
++      ←i
++
++    π ← -greedy(Q)
++
++Generate an episode S0, A0, R1, . . . , ST using π
++for t ← 0 to T − 1 do
++
++if (St, At) is a ﬁrst visit (with return Gt) then
++
++          N (St, At) ← N (St, At) + 1
++
++          Q(St, At)  ←  Q(St, At)  +  N     1     )  (Gt  −  Q(St, At))
++                                         (St ,At
++
++end
++
++end
++return π
++
++Algorithm 11: First-Visit Constant-α (GLIE) MC Control
++
++ Input: positive integer num episodes, small positive fraction α, GLIE { i}
++ Output: policy π (≈ π∗ if num episodes is large enough)
++ Initialize Q arbitrarily (e.g., Q(s, a) = 0 for all s ∈ S and a ∈ A(s))
++ for i ← 1 to num episodes do
++
++        ←i
++      π ← -greedy(Q)
++      Generate an episode S0, A0, R1, . . . , ST using π
++      for t ← 0 to T − 1 do
++
++           if (St, At) is a ﬁrst visit (with return Gt) then
++               Q(St, At) ← Q(St, At) + α(Gt − Q(St, At))
++
++      end
++
++ end
++ return π
++
++                                                                         8
++                                                                      6. Temporal-Difference Methods
++
++Algorithm 12: TD(0)
++ Input: policy π, positive integer num episodes
++ Output: value function V (≈ vπ if num episodes is large enough)
++ Initialize V arbitrarily (e.g., V (s) = 0 for all s ∈ S+)
++ for i ← 1 to num episodes do
++      Observe S0
++      t←0
++      repeat
++           Choose action At using policy π
++           Take action At and observe Rt+1, St+1
++           V (St) ← V (St) + α(Rt+1 + γV (St+1) − V (St))
++           t←t+1
++      until St is terminal ;
++ end
++ return V
++
++Algorithm 13: Sarsa
++ Input: policy π, positive integer num episodes, small positive fraction α, GLIE { i}
++ Output: value function Q (≈ qπ if num episodes is large enough)
++ Initialize Q arbitrarily (e.g., Q(s, a) = 0 for all s ∈ S and a ∈ A(s), and Q(terminal-state, ·) = 0)
++ for i ← 1 to num episodes do
++        ←i
++      Observe S0
++      Choose action A0 using policy derived from Q (e.g., -greedy)
++      t←0
++      repeat
++           Take action At and observe Rt+1, St+1
++           Choose action At+1 using policy derived from Q (e.g., -greedy)
++           Q(St, At) ← Q(St, At) + α(Rt+1 + γQ(St+1, At+1) − Q(St, At))
++           t←t+1
++      until St is terminal ;
++ end
++ return Q
++
++                                                                                               9
++Algorithm 14: Sarsamax (Q-Learning)
++ Input: policy π, positive integer num episodes, small positive fraction α, GLIE { i}
++ Output: value function Q (≈ qπ if num episodes is large enough)
++ Initialize Q arbitrarily (e.g., Q(s, a) = 0 for all s ∈ S and a ∈ A(s), and Q(terminal-state, ·) = 0)
++ for i ← 1 to num episodes do
++        ←i
++      Observe S0
++      t←0
++      repeat
++           Choose action At using policy derived from Q (e.g., -greedy)
++           Take action At and observe Rt+1, St+1
++           Q(St, At) ← Q(St, At) + α(Rt+1 + γ maxa Q(St+1, a) − Q(St, At))
++           t←t+1
++      until St is terminal ;
++ end
++ return Q
++
++Algorithm 15: Expected Sarsa
++ Input: policy π, positive integer num episodes, small positive fraction α, GLIE { i}
++ Output: value function Q (≈ qπ if num episodes is large enough)
++ Initialize Q arbitrarily (e.g., Q(s, a) = 0 for all s ∈ S and a ∈ A(s), and Q(terminal-state, ·) = 0)
++ for i ← 1 to num episodes do
++        ←i
++      Observe S0
++      t←0
++      repeat
++           Choose action At using policy derived from Q (e.g., -greedy)
++           Take action At and observe Rt+1, St+1
++           Q(St, At) ← Q(St, At) + α(Rt+1 + γ a π(a|St+1)Q(St+1, a) − Q(St, At))
++           t←t+1
++      until St is terminal ;
++ end
++ return Q
++
++                                                                                               10
++
+\ No newline at end of file
